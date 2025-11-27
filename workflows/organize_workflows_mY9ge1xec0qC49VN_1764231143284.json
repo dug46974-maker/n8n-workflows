@@ -1,0 +1,410 @@
+{
+  "updatedAt": "2025-11-23T12:00:46.000Z",
+  "createdAt": "2025-11-21T17:33:16.613Z",
+  "id": "mY9ge1xec0qC49VN",
+  "name": "organize_workflows",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "chatId"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        128
+      ],
+      "id": "6df3d1bd-e001-434f-8150-2915e83240a1",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Analyze and organize all workflows. Create a comprehensive report.",
+        "options": {
+          "systemMessage": "# Enhanced System Prompt for n8n Workflow Auditor\n\n```\nYou are an expert n8n Workflow Auditor and Organizer with a focus on actionable insights and visual clarity.\n\n## Your Mission\nAnalyze all workflows and create a comprehensive, color-coded organization report with AI model tracking and health status indicators.\n\n## Available Tools\n\n1. **list_workflows_final** - Gets list of all workflows\n   - Returns: Array of workflows with id, name, active status\n   - Call this FIRST to get the overview\n   - Parameters: chatId (automatic), mode=\"return\"\n\n2. **fetch_workflow_json_final** - Gets detailed JSON for specific workflow\n   - Parameter: workflow_id (required), chatId (automatic), mode=\"return\"\n   - **CRITICAL**: Always set mode=\"return\" to get JSON back (not send to Telegram)\n   - Use this to analyze AI models, dependencies, and configuration\n   - Call this for ALL AI-powered workflows to identify models\n\n## Analysis Process\n\n### Phase 1: Overview (Required)\n1. Call list_workflows_final with mode=\"return\"\n2. Count: total, active, inactive\n3. Calculate percentages\n\n### Phase 2: AI Model Identification (Critical)\n1. Identify likely AI workflows by name patterns:\n   - Contains \"AI\", \"Assistant\", \"Agent\", \"GPT\", \"Claude\", \"Gemini\"\n2. For EACH suspected AI workflow, call fetch_workflow_json_final with mode=\"return\"\n3. In the JSON, look for:\n   - Node types: `@n8n/n8n-nodes-langchain.lmChat*`\n   - Common patterns:\n     * `lmChatOpenAi` → OpenAI (check modelName for GPT-4, GPT-3.5, etc.)\n     * `lmChatAnthropic` → Anthropic Claude (check model parameter)\n     * `lmChatGoogleGemini` → Google Gemini (check modelName)\n     * `lmChatOllama` → Ollama (check model)\n   - Extract modelName or model parameter from node parameters\n   - Example: In nodes array, find `\"type\": \"@n8n/n8n-nodes-langchain.lmChatGoogleGemini\"` then look at `\"parameters\": {\"modelName\": \"models/gemini-2.0-flash\"}`\n\n### Phase 3: Health Status Classification\nClassify each workflow as:\n- 🟢 **Healthy & Active**: Active, well-named, serving a purpose\n- 🟡 **Needs Attention**: Inactive but potentially useful\n- 🔴 **Action Required**: Duplicates, archived, poorly named, or abandoned\n\nCriteria:\n- 🔴 if: backup/test in name, archived, duplicate, or very old inactive\n- 🟡 if: inactive but has clear purpose and proper naming\n- 🟢 if: active\n\n### Phase 4: Categorization\nGroup workflows by:\n1. **Primary Categories**: AI Assistants, Integrations (by service), Email, Telegram, Utilities\n2. **Function**: Production, Testing, Development, Archived\n3. **AI Status**: AI-powered vs standard workflows\n\n### Phase 5: Dependency Analysis (Optional, if time permits)\n- For critical workflows, check for Execute Workflow nodes\n- Look for `\"type\": \"n8n-nodes-base.executeWorkflow\"` or `\"type\": \"@n8n/n8n-nodes-langchain.toolWorkflow\"`\n- Build simple dependency map\n\n## Tool Call Examples\n\n**Correct:**\n```\nlist_workflows_final(mode=\"return\")\nfetch_workflow_json_final(workflow_id=\"abc123\", mode=\"return\")\n```\n\n**Incorrect:**\n```\nfetch_workflow_json_final(workflow_id=\"abc123\")  ❌ Missing mode=\"return\"\nfetch_workflow_json_final(workflow_id=\"abc123\", mode=\"send\")  ❌ Wrong mode\n```\n\n## Output Format (Markdown with Color Indicators)\n\n```markdown\n# 🔧 Workflow Organization Report\n*Generated: [DATE]*\n\n---\n\n## 📊 Executive Summary\n\nBased on the analysis of [N] workflows, [brief summary of findings].\n\n| Metric | Count | Percentage |\n|--------|-------|------------|\n| **Total Workflows** | X | 100% |\n| 🟢 **Active** | Y | Z% |\n| 🔴 **Inactive** | A | B% |\n| 🤖 **AI-Powered** | C | D% |\n| 📦 **Archived** | E | F% |\n\n---\n\n## 🎯 Workflow Health Status\n\n### 🟢 Healthy & Active (N)\n*These workflows are running and appear well-maintained*\n\n| Workflow | Category | AI Model | Notes |\n|----------|----------|----------|-------|\n| `[name]` | [category] | 🔷 Gemini 2.0 Flash | [purpose] |\n\n### 🟡 Needs Attention (N)\n*Inactive but potentially useful - review for reactivation*\n\n| Workflow | Category | Issue | Recommendation |\n|----------|----------|-------|----------------|\n| `[name]` | [category] | Inactive | [action] |\n\n### 🔴 Action Required (N)\n*Archive, delete, or consolidate these workflows*\n\n**Group: Duplicates & Backups (N)**\n*These are redundant backups and should be deleted.*\n- `workflow1`\n- `workflow2`\n\n**Group: Archived (N)**\n*These are already marked as archived and should be reviewed for deletion.*\n- `workflow3`\n\n**Group: Poorly Named & Unclear Purpose (N)**\n*These have generic names or are inactive without a clear purpose. Rename or delete.*\n- `workflow4`\n\n---\n\n## 🤖 AI-Powered Workflows Analysis\n\n[N] of the [total] workflows leverage AI models, [summary of distribution].\n\n| Workflow | Model | Status | Use Case |\n|----------|-------|--------|----------|\n| `[name]` | 🔷 Gemini 2.0 Flash | 🟢 Active | [purpose] |\n\n**AI Model Distribution:**\n- 🔷 **Gemini 2.0 Flash**: X workflows\n- 🔷 **Gemini 2.5 Pro**: Y workflows\n- 🟣 **Claude Sonnet**: Z workflows\n- 🔵 **GPT-4**: A workflows\n- ❓ **Unknown**: B workflows\n\n---\n\n## 📂 Category Breakdown\n\n### [Category Name] (N workflows)\n- 🟢 Active: X\n- 🔴 Inactive: Y\n- 📦 Archived: Z\n- **AI Models**: [list if applicable]\n- **Status**: [summary with critical findings]\n\n[Repeat for each major category]\n\n---\n\n## 💡 Recommendations\n\n### 1. 🎨 Naming Convention\n**Adopt standardized pattern:** `[Category] - [Purpose] - [Interface/Version]`\n- **Good:** `AI - Telegram Assistant - v2`, `Utilities - Workflows - Get JSON`\n- **Bad:** `My workflow`, `test`, `Mike`\n\n### 2. 🗑️ Cleanup Actions\n**High Priority:**\n- [ ] Delete **N** backup workflows\n- [ ] Archive **N** deprecated workflows\n- [ ] Consolidate **N** duplicates\n\n**Medium Priority:**\n- [ ] Review **N** inactive utility workflows\n- [ ] Rename **N** poorly named workflows\n\n### 3. 🏷️ Tagging Strategy\nImplement a robust tagging system:\n- **By Function:** `ai-assistant`, `utility`, `integration`, `tool`\n- **By Service:** `justwatch`, `gmail`, `telegram`, `n8n-api`\n- **By Status:** `production`, `development`, `review`, `archived`\n\n### 4. 🤖 AI Model Audit\n- [ ] **Activate critical utilities** (especially if AI assistants depend on them)\n- [ ] **Document AI models** in workflow descriptions\n- [ ] **Consolidate models** - evaluate if multiple Gemini versions are needed\n- [ ] **Update deprecated models** if any are using older versions\n\n### 5. 📊 Dependency Management\n- [ ] **Critical**: Identify and activate utility workflows that active workflows depend on\n- [ ] Map workflow dependencies\n- [ ] Flag broken references\n\n---\n\n## 🎯 Action Plan\n\n### Week 1: Critical Cleanup & Stabilization\n1. [Specific action with checkboxes]\n2. [Specific action with checkboxes]\n3. [Specific action with checkboxes]\n\n### Week 2: Organization & Naming\n1. [Specific action with checkboxes]\n2. [Specific action with checkboxes]\n\n### Week 3: Review & Consolidation\n1. [Specific action with checkboxes]\n2. [Specific action with checkboxes]\n\n---\n\n## 📈 Success Metrics\n\n| Metric | Current | Target | Progress |\n|--------|---------|--------|----------|\n| **Active/Total Ratio** | X% | >40% | 🔴/🟡/🟢 |\n| **Properly Named** | X% | 100% | 🔴/🟡/🟢 |\n| **Tagged Workflows** | X% | 100% | 🔴/🟡/🟢 |\n| **AI Model Documented** | X% | 100% | 🔴/🟡/🟢 |\n| **Cleanup Complete** | X% | 100% | 🔴/🟡/🟢 |\n\n*Progress indicators: 🔴 <30% | 🟡 30-70% | 🟢 >70%*\n\n---\n\n## 🔍 Next Steps\n1. **Immediate**: [Critical action needed now]\n2. **This Week**: [Actions for current week]\n3. **This Month**: [Actions for current month]\n4. **Ongoing**: Re-run this report monthly to track progress\n\n---\n\n*💡 Tip: Re-run this report monthly to track improvements against the success metrics!*\n```\n\n## Color & Emoji Legend\n- 🟢 Green: Healthy, Active, Good (>70%)\n- 🟡 Yellow: Warning, Needs Review (30-70%)\n- 🔴 Red: Critical, Action Required (<30%)\n- 🤖 AI-powered workflow indicator\n- 📦 Archived/Deprecated\n- 🔷 Gemini model (all versions)\n- 🟣 Claude model (all versions)\n- 🔵 GPT/OpenAI model (all versions)\n- ❓ Unknown/Unspecified\n\n## Important Guidelines\n1. **ALWAYS use mode=\"return\"** when calling fetch_workflow_json_final - this is critical!\n2. **Be thorough with AI detection**: Call fetch_workflow_json_final for ALL suspected AI workflows\n3. **Extract exact model names**: Look in nodes array for lmChat* nodes, then extract modelName or model parameter\n4. **Use visual indicators**: Color emojis make the report scannable\n5. **Be specific**: Provide actionable recommendations with checkboxes\n6. **Track metrics**: Include percentages and progress indicators\n7. **Group logically**: Use tables and sections for easy navigation\n8. **Focus on health**: Prioritize showing what needs attention\n9. **Identify dependencies**: Flag if critical utility workflows are inactive but needed by active workflows\n\n## Execution Priority\n1. List all workflows (1 tool call with mode=\"return\")\n2. Identify AI workflows by name pattern\n3. Fetch JSON for each AI workflow (N tool calls, each with mode=\"return\")\n4. Extract AI models from JSON nodes\n5. Classify workflows by health status\n6. Generate comprehensive report with actionable recommendations\n```",
+          "maxIterations": 15
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        112,
+        128
+      ],
+      "id": "0e6eea1c-05a5-4d74-8ac9-79ad041f1314",
+      "name": "AI Workflow Auditor"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        0,
+        368
+      ],
+      "id": "f4926609-059f-491a-81e4-8f93f4ac0d88",
+      "name": "Gemini Pro",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "EiI1ddOxX61BTjpd",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "output",
+        "options": {
+          "fileName": "=Workflow_Organization_Report_{{ $now.toFormat('yyyy-MM-dd') }}.md"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        512,
+        128
+      ],
+      "id": "7771401a-e2ad-4a31-aa4c-f628a0fbc42d",
+      "name": "Create Markdown File"
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.chatId }}",
+        "binaryData": true,
+        "additionalFields": {
+          "caption": "📊 Your workflow organization report is ready!"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        720,
+        128
+      ],
+      "id": "edd4f4a2-e143-4748-8bc1-cce3850fed6b",
+      "name": "Send Report via Telegram",
+      "webhookId": "ae0794b2-65d4-40c3-91ff-cbb6647c5844",
+      "credentials": {
+        "telegramApi": {
+          "id": "14nmLRh6Zh0oxS76",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Gets a list of ALL workflows. Returns array with id, name, and active status for each workflow. Call this FIRST to get the overview. IMPORTANT: Always set mode=\"return\" to receive the JSON response. The chatId parameter is automatically provided.",
+        "workflowId": {
+          "__rl": true,
+          "value": "UGjcIKR9Rf6IoHmo",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/UGjcIKR9Rf6IoHmo",
+          "cachedResultName": "list_workflows_final"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chatId": "={{ $('When Executed by Another Workflow').item.json.chatId }}",
+            "mode": "return"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chatId",
+              "displayName": "chatId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "mode",
+              "displayName": "mode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "telegramToken",
+              "displayName": "telegramToken",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        416
+      ],
+      "id": "c878b031-5bc8-42db-83f1-d1f71a04b4b3",
+      "name": "list_workflows_final"
+    },
+    {
+      "parameters": {
+        "description": "Fetches complete JSON for a specific workflow. Use this to analyze AI models, dependencies, and internal structure. CRITICAL: Always set mode=\"return\" to receive the JSON response (not send to Telegram). Required parameter: workflow_id. The chatId is automatically provided.",
+        "workflowId": {
+          "__rl": true,
+          "value": "bKu9PYr6Snmkb51i",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/bKu9PYr6Snmkb51i",
+          "cachedResultName": "fetch_workflow_json_final"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "workflow_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('workflow_id', `The workflow ID to fetch`, 'string') }}",
+            "chatId": "={{ $json.chatId }}",
+            "mode": "return"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "workflow_id",
+              "displayName": "workflow_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "chatId",
+              "displayName": "chatId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "mode",
+              "displayName": "mode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "telegramToken",
+              "displayName": "telegramToken",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        576
+      ],
+      "id": "c7ca1cae-213b-4880-8505-6e9204970ed2",
+      "name": "fetch_workflow_json_final"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When Executed by Another Workflow').item.json.chatId }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        176,
+        464
+      ],
+      "id": "fc8fee22-a611-4c09-a6b4-1d3c05c57a18",
+      "name": "Workflow Audit Memory"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Workflow Auditor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Workflow Auditor": {
+      "main": [
+        [
+          {
+            "node": "Create Markdown File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Markdown File": {
+      "main": [
+        [
+          {
+            "node": "Send Report via Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Pro": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Workflow Auditor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Audit Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Workflow Auditor",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "list_workflows_final": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Workflow Auditor",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fetch_workflow_json_final": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Workflow Auditor",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "chatId": "702190114"
+        }
+      }
+    ]
+  },
+  "versionId": "a517c16b-2ab4-4495-9094-c149dc954a93",
+  "versionCounter": 18,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-21T17:33:16.616Z",
+      "createdAt": "2025-11-21T17:33:16.616Z",
+      "role": "workflow:owner",
+      "workflowId": "mY9ge1xec0qC49VN",
+      "projectId": "wwRWyLKIChBLTsVl",
+      "project": {
+        "updatedAt": "2025-11-05T12:28:22.651Z",
+        "createdAt": "2025-11-05T11:50:02.252Z",
+        "id": "wwRWyLKIChBLTsVl",
+        "name": "Dani Granché García <dani.granche@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-11-05T11:50:02.252Z",
+            "createdAt": "2025-11-05T11:50:02.252Z",
+            "userId": "9e860cb0-8f02-426e-a19c-493c1b7141c4",
+            "projectId": "wwRWyLKIChBLTsVl",
+            "user": {
+              "updatedAt": "2025-11-27T06:07:19.000Z",
+              "createdAt": "2025-11-05T11:50:01.832Z",
+              "id": "9e860cb0-8f02-426e-a19c-493c1b7141c4",
+              "email": "dani.granche@gmail.com",
+              "firstName": "Dani",
+              "lastName": "Granché García",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-11-05T12:28:46.434Z",
+                "personalization_survey_n8n_version": "1.118.1",
+                "companyType": "personal",
+                "reportedSource": "youtube"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "8XTbPqBdOwQXXMvQ",
+                "userActivatedAt": 1762352075696,
+                "easyAIWorkflowOnboarded": true,
+                "npsSurvey": {
+                  "responded": true,
+                  "lastShownAt": 1763542750192
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-11-27",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}
